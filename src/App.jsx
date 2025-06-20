@@ -1,10 +1,8 @@
-import ExpenseTracker from "./components/Hero";
-
-
+import Expensive from "./components/Expensive";
 const App = () => {
   return(
     <div>
-  <ExpenseTracker />
+  <Expensive />
     </div>
   )
 
