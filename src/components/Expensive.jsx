@@ -7,7 +7,8 @@ const Expensive = () => {
     const [errors, setErrors] = useState({});
     const [category, setCategory] = useState("food");
     const [editingId, setEditingId] = useState(null);
-    const [isLoading, setIsLoading] = useState(true)
+    const [isLoading, setIsLoading] = useState(true);
+    const [searchingTerm, setSearchingTerm] = useState('')
 
     const categories = ['food','transport','Enteetainment','shopping','bills','other'];
 
@@ -123,13 +124,32 @@ const Expensive = () => {
         }
     }
 
+    const filteredExpenses = expenses.filter(expense => expense.title.toLowerCase().includes(searchingTerm.toLocaleLowerCase()) || 
+                                                         expense.category.toLowerCase().includes(searchingTerm.toLocaleLowerCase()));
+
+        const totolAmount = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0)
+                                                         
+
     const expensesByCategory = expenses.reduce((acc, expense) => {
         if(! acc[expense.category]) {
             acc[expense.category] = [];
         }
-        acc[expense.category].push(expense);
+        acc[expense.category].acount += 1;
+        acc[expense.category].acount += expense.amount
         return acc;
     },{})
+
+    if(isLoading){
+        return(
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <p>loading your expenses ..</p>
+                </div>
+
+            </div>
+        )
+    }
 
     return (
         <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg">
@@ -155,7 +175,7 @@ const Expensive = () => {
                         <select value={category} onChange={(e) => setCategory(e.target.value)} name="" id=""
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             {categories.map(cat => (
-                                <option key={cat} value="cat"> {cat}</option>
+                                <option key={cat} value={cat}> {cat}</option>
                             ))}
                         </select>
                     </div>
@@ -172,6 +192,47 @@ const Expensive = () => {
                 </div>
 
             </div>
+
+            <div className="bg-white rounded-lg">
+                <h3 className="text-lg font-semibold mb-4">search expense</h3>
+                <input type="text" value={searchingTerm} onChange={(e) => setSearchingTerm(e.target.value)} placeholder="search by tittle or category" 
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus: outline-none focus:ring-2 focus:ring-blue-500" />
+                {searchingTerm && (
+                    <p className="text-sm text-gray-600 mt-2">found {filteredExpenses.length} expense(s)</p>
+
+                )}
+
+            </div>
+            <div className="bg-white p-6 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">totol expending</h3>
+                <button
+                onClick={clearAllExpenses} 
+                className="w-full px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-700 transition-colors"
+                disabled = {expenses.length === 0 }>clear all expenses</button>
+                {expenses.length === 0 && (
+                    <p className="text-sm text-gray-500 mt-2">no expenses to clear</p>
+                )}
+            </div>
+
+   {Object.keys(expensesByCategory).length > 0 && (
+          <div className="bg-white rounded-lg  p-6 mb-8">
+            <h3 className="text-lg font-semibold mb-4">Spending by Category</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Object.entries(expensesByCategory).map(([cat, data]) => (
+                <div key={cat} className="border border-gray-200 rounded-lg p-4">
+                  <h4 className="font-medium text-gray-800">{cat}</h4>
+                  <p className="text-lg font-semibold text-blue-600">
+                    {data.amount} RWF
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {data.count} expense(s)
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
             <div>
                 <h1>  📋 My Expensive ({expenses.length})</h1>
                 {expenses.length > 0 && (
