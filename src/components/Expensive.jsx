@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 const Expensive = () => {
     const [expenses, setExpenses] = useState([]);
@@ -6,9 +6,44 @@ const Expensive = () => {
     const [amount, setAmount] = useState("");
     const [errors, setErrors] = useState({});
     const [category, setCategory] = useState("food");
-    const [editingId, setEditingId] = useState(null)
+    const [editingId, setEditingId] = useState(null);
+    const [isLoading, setIsLoading] = useState(true)
 
     const categories = ['food','transport','Enteetainment','shopping','bills','other'];
+
+    useEffect(()=> {
+        const loadExpenses = () => {
+            try {
+                const savedExpenses = localStorage.getItem('expenses');
+                if(savedExpenses){
+                    const parsedExpense = JSON.parse(savedExpenses)
+                    setExpenses(parsedExpense)
+                }
+                
+            } catch (error) {
+                console.error('error loading expense',error);
+                setExpenses([])
+                
+            }finally{
+                setTimeout(() => setIsLoading(false), 500)
+            }
+          
+        }
+        loadExpenses()
+
+    },[])
+
+    useEffect(() => {
+        if(!isLoading){
+            try {
+                localStorage.setItem('expenses',JSON.stringify(expenses))
+                
+            } catch (error) {
+                console.log('error saving expenses',error);
+                
+            }
+        }
+    },[expenses, isLoading])
 
     const addExpense = () =>{
         setErrors({});
@@ -50,8 +85,12 @@ const Expensive = () => {
       
     }
     const deleteExponse = (idToDelete) => {
-          const updateExpenses = expenses.filter(expense => expense.id !== idToDelete);
+        if(window.confirm('are you sure you want to delete this expense')){
+            const updateExpenses = expenses.filter(expense => expense.id !== idToDelete);
           setExpenses(updateExpenses);
+
+        }
+          
 
           if(editingId === idToDelete){
             setEditingId(null);
@@ -79,7 +118,9 @@ const Expensive = () => {
     }
 
     const clearAllExpenses = () => {
-        setExpenses([])
+        if(window.confirm('are you sure you want to delete all expenses')){
+            setExpenses([])
+        }
     }
 
     const expensesByCategory = expenses.reduce((acc, expense) => {
